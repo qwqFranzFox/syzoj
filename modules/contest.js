@@ -10,6 +10,9 @@ const { getSubmissionInfo, getRoughResult, processOverallResult } = require('../
 
 app.get('/contests', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
     let where;
     if (res.locals.user && res.locals.user.is_admin) where = {}
     else where = { is_public: true };
@@ -35,6 +38,8 @@ app.get('/contests', async (req, res) => {
 
 app.get('/contest/:id/edit', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
 
     let contest_id = parseInt(req.params.id);
     let contest = await Contest.findById(contest_id);
@@ -70,6 +75,8 @@ app.get('/contest/:id/edit', async (req, res) => {
 
 app.post('/contest/:id/edit', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
 
     let contest_id = parseInt(req.params.id);
     let contest = await Contest.findById(contest_id);
@@ -90,7 +97,7 @@ app.post('/contest/:id/edit', async (req, res) => {
     } else {
       // if contest exists, both system administrators and contest administrators can edit it.
       if (!res.locals.user || (!res.locals.user.is_admin && !contest.admins.includes(res.locals.user.id.toString()))) throw new ErrorMessage('您没有权限进行此操作。');
-      
+
       await contest.loadRelationships();
       ranklist = contest.ranklist;
     }
@@ -129,6 +136,9 @@ app.post('/contest/:id/edit', async (req, res) => {
 
 app.get('/contest/:id', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
     const curUser = res.locals.user;
     let contest_id = parseInt(req.params.id);
 
@@ -236,6 +246,9 @@ app.get('/contest/:id', async (req, res) => {
 
 app.get('/contest/:id/ranklist', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
     let contest_id = parseInt(req.params.id);
     let contest = await Contest.findById(contest_id);
     const curUser = res.locals.user;
@@ -312,6 +325,9 @@ function getDisplayConfig(contest) {
 
 app.get('/contest/:id/submissions', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
     let contest_id = parseInt(req.params.id);
     let contest = await Contest.findById(contest_id);
     // if contest is non-public, both system administrators and contest administrators can see it.
@@ -362,7 +378,7 @@ app.get('/contest/:id/submissions', async (req, res) => {
         }));
       } else if (req.body.language === 'non-submit-answer') {
         query.andWhere('language != :language', { language: '' })
-             .andWhere('language IS NOT NULL');
+          .andWhere('language IS NOT NULL');
       } else {
         query.andWhere('language = :language', { language: req.body.language })
       }
@@ -383,7 +399,7 @@ app.get('/contest/:id/submissions', async (req, res) => {
     }
 
     query.andWhere('type = 1')
-         .andWhere('type_info = :contest_id', { contest_id });
+      .andWhere('type_info = :contest_id', { contest_id });
 
     let judge_state, paginate;
 
@@ -441,6 +457,10 @@ app.get('/contest/:id/submissions', async (req, res) => {
 
 app.get('/contest/submission/:id', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
+
     const id = parseInt(req.params.id);
     const judge = await JudgeState.findById(id);
     if (!judge) throw new ErrorMessage("提交记录 ID 不正确。");
@@ -492,6 +512,10 @@ app.get('/contest/submission/:id', async (req, res) => {
 
 app.get('/contest/:id/problem/:pid', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
+
     let contest_id = parseInt(req.params.id);
     let contest = await Contest.findById(contest_id);
     if (!contest) throw new ErrorMessage('无此比赛。');
@@ -542,6 +566,10 @@ app.get('/contest/:id/problem/:pid', async (req, res) => {
 
 app.get('/contest/:id/:pid/download/additional_file', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
+
     let id = parseInt(req.params.id);
     let contest = await Contest.findById(id);
     if (!contest) throw new ErrorMessage('无此比赛。');

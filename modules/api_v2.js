@@ -3,6 +3,8 @@ const url = require('url');
 
 app.get('/api/v2/search/users/:keyword*?', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
     let User = syzoj.model('user');
 
     let keyword = req.params.keyword || '';
@@ -38,6 +40,8 @@ app.get('/api/v2/search/users/:keyword*?', async (req, res) => {
 
 app.get('/api/v2/search/problems/:keyword*?', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
     let Problem = syzoj.model('problem');
 
     let keyword = req.params.keyword || '';
@@ -75,6 +79,8 @@ app.get('/api/v2/search/problems/:keyword*?', async (req, res) => {
 
 app.get('/api/v2/search/tags/:keyword*?', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
     let Problem = syzoj.model('problem');
     let ProblemTag = syzoj.model('problem_tag');
 
@@ -100,6 +106,8 @@ app.get('/api/v2/search/tags/:keyword*?', async (req, res) => {
 
 app.apiRouter.post('/api/v2/markdown', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
     let s = await syzoj.utils.markdown(req.body.s.toString(), null, req.body.noReplaceUI === 'true');
     res.send(s);
   } catch (e) {
@@ -119,6 +127,8 @@ function verifyJWT(token) {
 
 app.apiRouter.get('/api/v2/download/:token', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
     const token = req.params.token, data = jwt.decode(token);
     if (!data) throw new ErrorMessage("无效的令牌。");
     if (url.parse(syzoj.utils.getCurrentLocation(req, true)).href !== url.parse(syzoj.config.site_for_download).href) {

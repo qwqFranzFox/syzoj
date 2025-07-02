@@ -130,6 +130,8 @@ app.post('/api/sign_up', async (req, res) => {
 
 app.get('/api/forget_confirm', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
     try {
       jwt.verify(req.query.token, syzoj.config.email_jwt_secret, { subject: 'forget' });
     } catch (e) {
@@ -148,6 +150,8 @@ app.get('/api/forget_confirm', async (req, res) => {
 
 app.post('/api/reset_password', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
     res.setHeader('Content-Type', 'application/json');
     let obj;
     try {

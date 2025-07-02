@@ -10,13 +10,16 @@ const timeAgo = new TimeAgo('zh-CN');
 
 app.get('/', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
     let ranklist = await User.queryRange([1, syzoj.config.page.ranklist_index], { is_show: true }, {
       [syzoj.config.sorting.ranklist.field]: syzoj.config.sorting.ranklist.order
     });
     await ranklist.forEachAsync(async x => x.renderInformation());
 
     let notices = (await Article.find({
-      where: { is_notice: true }, 
+      where: { is_notice: true },
       order: { public_time: 'DESC' }
     })).map(article => ({
       title: article.title,
@@ -59,6 +62,9 @@ app.get('/', async (req, res) => {
 
 app.get('/help', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
     res.render('help');
   } catch (e) {
     syzoj.log(e);

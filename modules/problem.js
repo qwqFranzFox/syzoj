@@ -14,6 +14,9 @@ let CodeFormatter = syzoj.lib('code_formatter');
 
 app.get('/problems', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
     const sort = req.query.sort || syzoj.config.sorting.problem.field;
     const order = req.query.order || syzoj.config.sorting.problem.order;
     if (!['id', 'title', 'rating', 'ac_num', 'submit_num', 'ac_rate', 'publicize_time'].includes(sort) || !['asc', 'desc'].includes(order)) {
@@ -24,7 +27,7 @@ app.get('/problems', async (req, res) => {
     if (!res.locals.user || !await res.locals.user.hasPrivilege('manage_problem')) {
       if (res.locals.user) {
         query.where('is_public = 1')
-             .orWhere('user_id = :user_id', { user_id: res.locals.user.id });
+          .orWhere('user_id = :user_id', { user_id: res.locals.user.id });
       } else {
         query.where('is_public = 1');
       }
@@ -62,6 +65,9 @@ app.get('/problems', async (req, res) => {
 
 app.get('/problems/search', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
     let id = parseInt(req.query.keyword) || 0;
     const sort = req.query.sort || syzoj.config.sorting.problem.field;
     const order = req.query.order || syzoj.config.sorting.problem.order;
@@ -73,23 +79,23 @@ app.get('/problems/search', async (req, res) => {
     if (!res.locals.user || !await res.locals.user.hasPrivilege('manage_problem')) {
       if (res.locals.user) {
         query.where(new TypeORM.Brackets(qb => {
-             qb.where('is_public = 1')
-                 .orWhere('user_id = :user_id', { user_id: res.locals.user.id })
-             }))
-             .andWhere(new TypeORM.Brackets(qb => {
-               qb.where('title LIKE :title', { title: `%${req.query.keyword}%` })
-                 .orWhere('id = :id', { id: id })
-             }));
+          qb.where('is_public = 1')
+            .orWhere('user_id = :user_id', { user_id: res.locals.user.id })
+        }))
+          .andWhere(new TypeORM.Brackets(qb => {
+            qb.where('title LIKE :title', { title: `%${req.query.keyword}%` })
+              .orWhere('id = :id', { id: id })
+          }));
       } else {
         query.where('is_public = 1')
-             .andWhere(new TypeORM.Brackets(qb => {
-               qb.where('title LIKE :title', { title: `%${req.query.keyword}%` })
-                 .orWhere('id = :id', { id: id })
-             }));
+          .andWhere(new TypeORM.Brackets(qb => {
+            qb.where('title LIKE :title', { title: `%${req.query.keyword}%` })
+              .orWhere('id = :id', { id: id })
+          }));
       }
     } else {
       query.where('title LIKE :title', { title: `%${req.query.keyword}%` })
-           .orWhere('id = :id', { id: id })
+        .orWhere('id = :id', { id: id })
     }
 
     query.orderBy('id = ' + id.toString(), 'DESC');
@@ -706,7 +712,7 @@ app.post('/problem/:id/submit', app.multer.fields([{ name: 'answer', maxCount: 1
 
           try {
             await formattedCode.save();
-          } catch (e) {}
+          } catch (e) { }
         }
       }
     }
@@ -811,7 +817,7 @@ app.post('/problem/:id/testdata/delete/:filename', async (req, res) => {
     if (!problem) throw new ErrorMessage('无此题目。');
     if (!await problem.isAllowedEditBy(res.locals.user)) throw new ErrorMessage('您没有权限进行此操作。');
     if (typeof req.params.filename === 'string' && (req.params.filename.includes('../'))) throw new ErrorMessage('您没有权限进行此操作。)');
-    
+
     await problem.deleteTestdataSingleFile(req.params.filename);
 
     res.redirect(syzoj.utils.makeUrl(['problem', id, 'testdata']));
@@ -839,6 +845,9 @@ function downloadOrRedirect(req, res, filename, sendName) {
 
 app.get('/problem/:id/testdata/download/:filename?', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
     let id = parseInt(req.params.id);
     let problem = await Problem.findById(id);
 
@@ -868,6 +877,9 @@ app.get('/problem/:id/testdata/download/:filename?', async (req, res) => {
 
 app.get('/problem/:id/download/additional_file', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
     let id = parseInt(req.params.id);
     let problem = await Problem.findById(id);
 
@@ -901,6 +913,10 @@ app.get('/problem/:id/download/additional_file', async (req, res) => {
 
 app.get('/problem/:id/statistics/:type', async (req, res) => {
   try {
+    // Login required
+    if (!res.locals.user) throw new ErrorMessage('请登录后继续。', { '登录': syzoj.utils.makeUrl(['login'], { 'url': req.originalUrl }) });
+
+
     let id = parseInt(req.params.id);
     let problem = await Problem.findById(id);
 
